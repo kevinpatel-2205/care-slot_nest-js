@@ -396,7 +396,7 @@ export class AdminService {
 
     return {
       data: patients.map((p) => ({
-        id: p.id,
+        id: p.patient?.id,
         name: p.name,
         email: p.email,
         totalAppointments: p.patient?._count.appointments || 0,

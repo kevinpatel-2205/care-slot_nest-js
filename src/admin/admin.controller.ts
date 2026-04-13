@@ -54,11 +54,11 @@ export class AdminController {
   }
 
   @Get('patients')
-  getPatients(@Query() query: PaginationDto, @Query('search') search?: string) {
+  getPatients(@Query() query: PaginationDto) {
     return this.adminService.getPatients(
       query.page ?? 1,
       query.limit ?? 10,
-      search,
+      query.search,
     );
   }
 
