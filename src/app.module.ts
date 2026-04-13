@@ -4,6 +4,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AdminModule } from './admin/admin.module';
+import { DoctorModule } from './doctor/doctor.module';
+import { PatientModule } from './patient/patient.module';
 import envConfig from './config/env.config';
 
 @Module({
@@ -12,6 +14,8 @@ import envConfig from './config/env.config';
     PrismaModule,
     AuthModule,
     AdminModule,
+    DoctorModule,
+    PatientModule,
   ],
   controllers: [AppController],
 })
