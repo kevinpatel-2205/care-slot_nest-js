@@ -7,6 +7,7 @@ import { AdminModule } from './admin/admin.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { PatientModule } from './patient/patient.module';
 import { PaymentModule } from './payment/payment.module';
+import { HomeModule } from './home/home.module';
 import envConfig from './config/env.config';
 
 @Module({
@@ -18,6 +19,7 @@ import envConfig from './config/env.config';
     DoctorModule,
     PatientModule,
     PaymentModule,
+    HomeModule,
   ],
   controllers: [AppController],
 })

@@ -9,7 +9,20 @@ import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const configService = app.get(ConfigService);
+  const clientUrl = configService.get<string>('app.clientUrl');
+  const port = configService.get<number>('app.port') ?? 3000;
+  
   app.use(cookieParser());
+
+  app.enableCors({
+    origin: clientUrl,
+    credentials: true,
+  });
+
+  app.setGlobalPrefix('api');
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -19,9 +32,6 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
-
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>('port') || 3000;
 
   await app.listen(port, () => {
     console.log(`Server running on port ${port}

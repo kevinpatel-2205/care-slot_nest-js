@@ -52,16 +52,25 @@ export class PatientController {
   }
 
   @Get('appointments')
-  getAppointments(
+  async getAppointments(
     @CurrentUser() user: JwtPayload,
     @Query() query: GetAppointmentsQueryDto,
   ) {
-    return this.patientService.getAppointments(
+    const result = await this.patientService.getAppointments(
       user.userId,
       query.status,
       query.page ?? 1,
       query.limit ?? 5,
     );
+    return {
+      message: 'Success',
+      data: {
+        data: result.data,
+        currentPage: result.currentPage,
+        totalPages: result.totalPages,
+        totalItems: result.totalItems,
+      },
+    };
   }
 
   @Get('profile')

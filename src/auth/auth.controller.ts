@@ -63,7 +63,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getProfile(@CurrentUser() user: JwtPayload) {
+  async getMe(@CurrentUser() user: JwtPayload) {
     return await this.authService.getMe(user.userId);
   }
 

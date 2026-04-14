@@ -12,4 +12,7 @@ export class VerifyPaymentDto {
   @IsNotEmpty()
   @IsString()
   razorpay_signature!: string;
+
+  @IsString()
+  appointmentId!: string;
 }

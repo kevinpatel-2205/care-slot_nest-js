@@ -142,6 +142,7 @@ export class PatientService {
         isDeleted: false,
       },
       orderBy: { appointmentDate: 'asc' },
+      take: 5,
       select: {
         appointmentDate: true,
         timeSlot: true,
@@ -488,8 +489,6 @@ export class PatientService {
 
     const skip = (page - 1) * limit;
 
-    // ─── Fetch appointments (no status filter yet — need all for expire check) ───
-
     const allActiveFilter = {
       patientId: patient.id,
       isDeleted: false,
@@ -508,7 +507,6 @@ export class PatientService {
       },
     });
 
-    // ─── Run expire logic before returning data ───
     await this.expireAppointments(
       pendingConfirmed.map((a) => ({
         id: a.id,
@@ -520,7 +518,6 @@ export class PatientService {
       })),
     );
 
-    // ─── Now fetch with pagination + optional status filter ───
     const where = {
       patientId: patient.id,
       isDeleted: false,
@@ -552,7 +549,6 @@ export class PatientService {
       }),
       this.prisma.appointment.count({ where }),
     ]);
-
     return {
       data: appointments.map((apt) => ({
         appointmentId: apt.id,
