@@ -12,11 +12,18 @@ export interface JwtPayload {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
+    const secret = configService.get<string>('jwt.secret');
+
+    if (!secret) {
+      throw new Error('JWT_SECRET missing');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('jwt.secret') ?? 'dev-secret-key',
+      secretOrKey: secret,
     });
   }
+
   async validate(payload: JwtPayload): Promise<JwtPayload> {
     return { userId: payload.userId, role: payload.role };
   }

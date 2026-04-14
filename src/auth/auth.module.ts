@@ -3,21 +3,28 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import type { StringValue } from 'ms';
 
 @Module({
   imports: [
-    ConfigModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.secret') ?? 'dev-secret-key',
-        signOptions: {
-          expiresIn: (configService.get<string>('jwt.expiresIn') ??
-            '1d') as StringValue,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('jwt.secret');
+
+        if (!secret) {
+          throw new Error('JWT_SECRET missing');
+        }
+
+        return {
+          secret,
+          signOptions: {
+            expiresIn: (configService.get<string>('jwt.expiresIn') ??
+              '1d') as StringValue,
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

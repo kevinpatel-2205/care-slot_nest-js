@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AdminModule } from './admin/admin.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { PatientModule } from './patient/patient.module';
+import { PaymentModule } from './payment/payment.module';
 import envConfig from './config/env.config';
 
 @Module({
@@ -16,6 +17,7 @@ import envConfig from './config/env.config';
     AdminModule,
     DoctorModule,
     PatientModule,
+    PaymentModule,
   ],
   controllers: [AppController],
 })
