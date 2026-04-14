@@ -48,6 +48,11 @@ export class AuthService {
       },
     });
 
+    const token = this.jwt.sign({
+      userId: user.id,
+      role: user.role,
+    });
+
     const safeUser: SafeUser = {
       id: user.id,
       name: user.name,
@@ -58,6 +63,7 @@ export class AuthService {
 
     return {
       message: 'Patient registered successfully',
+      token,
       data: safeUser,
     };
   }
@@ -92,8 +98,8 @@ export class AuthService {
 
     return {
       message: 'Login successful',
+      token,
       data: {
-        token,
         user: safeUser,
       },
     };

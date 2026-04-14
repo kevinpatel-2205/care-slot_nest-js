@@ -8,13 +8,14 @@ export interface SafeUser {
 
 export interface RegisterResponse {
   message: string;
+  token: string;
   data: SafeUser;
 }
 
 export interface LoginResponse {
   message: string;
+  token: string;
   data: {
-    token: string;
     user: SafeUser;
   };
 }

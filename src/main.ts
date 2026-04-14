@@ -5,8 +5,11 @@ import { ResponseInterceptor } from './common/interceptors';
 import { HttpExceptionFilter } from './common/filters';
 import { ConfigService } from '@nestjs/config';
 
+import cookieParser from 'cookie-parser';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

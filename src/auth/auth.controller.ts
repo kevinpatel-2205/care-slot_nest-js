@@ -1,4 +1,5 @@
-import { Controller, Post, Body, Get, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, UseGuards, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -19,18 +20,50 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() body: RegisterDto): Promise<RegisterResponse> {
-    return await this.authService.register(body);
+  async register(
+    @Body() body: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.register(body);
+    res.cookie('token', result.token, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    const { token: _, ...data } = result;
+    return data;
   }
 
   @Post('login')
-  async login(@Body() body: LoginDto): Promise<LoginResponse> {
-    return await this.authService.login(body.email, body.password);
+  async login(
+    @Body() body: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.login(body.email, body.password);
+    res.cookie('token', result.token, {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    const { token: _, ...data } = result;
+    return data;
+  }
+
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('token', {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+      secure: process.env.NODE_ENV === 'production',
+    });
+    return { message: 'Logged out successfully' };
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getProfile(@CurrentUser() user: JwtPayload): Promise<GetMeResponse> {
+  async getProfile(@CurrentUser() user: JwtPayload) {
     return await this.authService.getMe(user.userId);
   }
 
@@ -39,7 +72,7 @@ export class AuthController {
   async updatePassword(
     @CurrentUser() user: JwtPayload,
     @Body() dto: UpdatePasswordDto,
-  ): Promise<UpdatePasswordResponse> {
+  ) {
     return await this.authService.updatePassword(user.userId, dto);
   }
 }
