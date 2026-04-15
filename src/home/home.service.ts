@@ -31,7 +31,7 @@ export class HomeService {
       }),
 
       this.prisma.review.findMany({
-        where: { rating: 5, isApprove: true, isDeleted: false },
+        where: { isApprove: true, isDeleted: false },
         orderBy: { createdAt: 'desc' },
         take: 5,
         select: {

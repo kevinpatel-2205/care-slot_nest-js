@@ -8,10 +8,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { BookAppointmentDto } from './dto/book-appointment.dto';
 import { AppointmentStatus, Gender } from '@prisma/client';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { AiReviewService } from '../ai/ai-review.service';
+import { CreateReviewDto } from './dto/create-review.dto';
 
 @Injectable()
 export class PatientService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly aiReviewService: AiReviewService,
+  ) {}
 
   private parseTimeSlot(timeSlot: string, baseDate: Date): Date {
     const [timePart, modifier] = timeSlot.trim().split(' ');
@@ -661,7 +666,7 @@ export class PatientService {
     }
 
     if (dto.gender !== undefined) {
-      patientUpdateData.gender = dto.gender.toUpperCase() as Gender;
+      patientUpdateData.gender = dto.gender as Gender;
     }
 
     if (dto.medicalHistory !== undefined) {
@@ -696,6 +701,107 @@ export class PatientService {
     });
     return {
       message: 'Profile updated successfully',
+    };
+  }
+
+  async createReview(userId: string, dto: CreateReviewDto) {
+    const { doctorId, rating, comment } = dto;
+
+    const patient = await this.prisma.patient.findFirst({
+      where: { userId, isDeleted: false },
+    });
+
+    if (!patient) {
+      throw new NotFoundException('Patient profile not found');
+    }
+
+    const doctor = await this.prisma.doctor.findFirst({
+      where: { id: doctorId, isDeleted: false },
+    });
+
+    if (!doctor) {
+      throw new NotFoundException('Doctor not found');
+    }
+
+    const completedAppointment = await this.prisma.appointment.findFirst({
+      where: {
+        patientId: patient.id,
+        doctorId,
+        status: 'COMPLETED',
+        isDeleted: false,
+      },
+    });
+
+    if (!completedAppointment) {
+      throw new BadRequestException(
+        'You can only review a doctor after a completed appointment',
+      );
+    }
+
+    const existingReview = await this.prisma.review.findFirst({
+      where: {
+        patientId: patient.id,
+        doctorId,
+        isDeleted: false,
+      },
+    });
+
+    if (existingReview) {
+      throw new ConflictException('You have already reviewed this doctor');
+    }
+
+    let isApprove = true;
+    let aiReason = '';
+
+    if (comment && comment.trim().length > 0) {
+      const aiResult = await this.aiReviewService.checkReview(comment.trim());
+      isApprove = aiResult.approved;
+      aiReason = aiResult.reason ?? '';
+    }
+
+    const review = await this.prisma.review.create({
+      data: {
+        doctorId,
+        patientId: patient.id,
+        rating,
+        comment: comment?.trim() ?? '',
+        isApprove,
+        aiReason,
+      },
+    });
+
+    const ratingAgg = await this.prisma.review.aggregate({
+      where: {
+        doctorId,
+        isApprove: true,
+        isDeleted: false,
+      },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    await this.prisma.doctor.update({
+      where: { id: doctorId },
+      data: {
+        averageRating: parseFloat((ratingAgg._avg.rating ?? 0).toFixed(1)),
+        totalReviews: ratingAgg._count.rating,
+      },
+    });
+
+    return {
+      message: isApprove
+        ? 'Review submitted successfully'
+        : 'Review submitted and is pending moderation',
+      data: {
+        reviewId: review.id,
+        rating: review.rating,
+        comment: review.comment,
+        isApprove: review.isApprove,
+        ...(isApprove === false && {
+          moderationNote:
+            'Your review contains content that did not pass our moderation policy.',
+        }),
+      },
     };
   }
 }

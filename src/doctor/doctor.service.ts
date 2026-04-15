@@ -324,7 +324,7 @@ export class DoctorService {
 
     return {
       message: 'Appointment status updated to COMPLETED',
-      data: { appointmentId, status: AppointmentStatus.COMPLETED },
+      data: { appointmentId, appointmentStatus: AppointmentStatus.COMPLETED },
     };
   }
 
@@ -647,21 +647,13 @@ export class DoctorService {
       }
     }
 
-    for (const slot of slots) {
-      const dateKey = slot.date.toISOString().split('T')[0];
-
-      if (!groupedMap.has(dateKey)) {
-        groupedMap.set(dateKey, { date: slot.date, times: [] });
-      }
-
-      groupedMap.get(dateKey)!.times.push({ id: slot.id, time: slot.time });
-    }
-
     return {
-      data: Array.from(groupedMap.values()),
-      currentPage: page,
-      totalPages: Math.ceil(totalDates / limit),
-      total: totalDates,
+      data: {
+        slots: Array.from(groupedMap.values()),
+        currentPage: page,
+        totalPages: Math.ceil(totalDates / limit),
+        total: totalDates,
+      },
     };
   }
 

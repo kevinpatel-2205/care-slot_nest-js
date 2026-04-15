@@ -260,10 +260,12 @@ export class AdminService {
     });
 
     return {
-      data: formattedDoctors,
-      currentPage: page,
-      totalPages: Math.ceil(totalDoctors / limit),
-      total: totalDoctors,
+      data: {
+        doctors: formattedDoctors,
+        currentPage: page,
+        totalPages: Math.ceil(totalDoctors / limit),
+        total: totalDoctors,
+      },
     };
   }
 
@@ -395,18 +397,20 @@ export class AdminService {
     ]);
 
     return {
-      data: patients.map((p) => ({
-        id: p.patient?.id,
-        name: p.name,
-        email: p.email,
-        totalAppointments: p.patient?._count.appointments || 0,
-      })),
+      data: {
+        patients: patients.map((p) => ({
+          id: p.patient?.id,
+          name: p.name,
+          email: p.email,
+          totalAppointments: p.patient?._count.appointments || 0,
+        })),
 
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       },
     };
   }
@@ -511,21 +515,23 @@ export class AdminService {
     ]);
 
     return {
-      data: appointments.map((appt) => ({
-        appointmentId: appt.id,
-        patientName: appt.patient?.user?.name ?? 'Unknown',
-        doctorName: appt.doctor?.user?.name ?? 'Unknown',
-        appointmentDate: appt.appointmentDate,
-        timeSlot: appt.timeSlot,
-        status: appt.status,
-        consultationFee: appt.consultationFee,
-        adminCommission: appt.adminCommission,
-        paymentMethod: appt.paymentMethod,
-        prescriptionAdded: appt.prescriptionAdded,
-      })),
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      total,
+      data: {
+        appointments: appointments.map((appt) => ({
+          appointmentId: appt.id,
+          patientName: appt.patient?.user?.name ?? 'Unknown',
+          doctorName: appt.doctor?.user?.name ?? 'Unknown',
+          appointmentDate: appt.appointmentDate,
+          timeSlot: appt.timeSlot,
+          status: appt.status,
+          consultationFee: appt.consultationFee,
+          adminCommission: appt.adminCommission,
+          paymentMethod: appt.paymentMethod,
+          prescriptionAdded: appt.prescriptionAdded,
+        })),
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        total,
+      },
     };
   }
 
@@ -548,6 +554,7 @@ export class AdminService {
           rating: true,
           comment: true,
           createdAt: true,
+          aiReason: true,
           patient: {
             select: {
               user: { select: { name: true, image: true } },
@@ -566,6 +573,7 @@ export class AdminService {
     return {
       data: reviews.map((r) => ({
         reviewId: r.id,
+        aiReason: r.aiReason,
         rating: r.rating,
         comment: r.comment,
         createdAt: r.createdAt,

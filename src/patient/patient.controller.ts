@@ -18,6 +18,7 @@ import { GetDoctorsQueryDto } from './dto/get-doctors-query.dto';
 import { BookAppointmentDto } from './dto/book-appointment.dto';
 import { GetAppointmentsQueryDto } from './dto/get-appointments-query.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { CreateReviewDto } from './dto/create-review.dto';
 
 @Controller('patient')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -84,5 +85,10 @@ export class PatientController {
     @Body() dto: UpdateProfileDto,
   ) {
     return this.patientService.updateProfile(user.userId, dto);
+  }
+
+  @Post('reviews')
+  createReview(@CurrentUser() user: JwtPayload, @Body() dto: CreateReviewDto) {
+    return this.patientService.createReview(user.userId, dto);
   }
 }

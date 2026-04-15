@@ -12,4 +12,9 @@ export default () => ({
     keyId: process.env.RAZORPAY_KEY_ID,
     keySecret: process.env.RAZORPAY_KEY_SECRET,
   },
+  groq: {
+    apiKey: process.env.GROQ_API_KEY,
+    model: process.env.GROQ_MODEL,
+  },
+  currency: process.env.CURRENCY ?? 'INR',
 });
