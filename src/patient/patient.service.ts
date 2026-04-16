@@ -16,7 +16,7 @@ export class PatientService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiReviewService: AiReviewService,
-  ) {}
+  ) { }
 
   private parseTimeSlot(timeSlot: string, baseDate: Date): Date {
     const [timePart, modifier] = timeSlot.trim().split(' ');
@@ -225,6 +225,22 @@ export class PatientService {
         isActive: doc.user?.isActive ?? false,
         specialization: doc.specialization,
         consultationFee: doc.consultationFee,
+        availableSlots: Object.values(
+          doc.availableSlots.reduce((acc, slot) => {
+            const dateKey = new Date(slot.date).toISOString().slice(0, 10);
+
+            if (!acc[dateKey]) {
+              acc[dateKey] = {
+                date: dateKey,
+                times: [],
+              };
+            }
+
+            acc[dateKey].times.push(slot.time);
+
+            return acc;
+          }, {} as Record<string, { date: string; times: string[] }>)
+        ),
         availabilityStatus:
           doc.availableSlots.length > 0 ? 'Available' : 'Unavailable',
         averageRating: doc.averageRating ?? 0,
@@ -617,10 +633,10 @@ export class PatientService {
         geolocation:
           patient?.latitude && patient?.longitude
             ? {
-                latitude: patient.latitude,
-                longitude: patient.longitude,
-                address: patient.address ?? null,
-              }
+              latitude: patient.latitude,
+              longitude: patient.longitude,
+              address: patient.address ?? null,
+            }
             : null,
       },
     };

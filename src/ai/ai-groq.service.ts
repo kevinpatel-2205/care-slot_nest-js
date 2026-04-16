@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Groq from 'groq-sdk';
 import { getGroqInstance } from '../config/groq.config';
-import { GUEST_PROMPT } from './prompts/guest.prompt';
 import { REVIEW_MODERATION_PROMPT } from './prompts/review-moderation.prompt';
 
 // re-export all prompts cleanly
@@ -106,24 +104,38 @@ export class AiGroqService {
       const groq = getGroqInstance();
       const completion = await groq.chat.completions.create({
         model: this.model,
-        temperature: 0.3,
+        temperature: 0,
         messages: [
           {
             role: 'system',
-            content: `
-You are a function selection AI. Select the correct function name based on the user message.
-Only choose from: ${functionNames.join(', ')}.
-Return ONLY JSON: { "functionName": "name_here" }
-No explanation. No extra text.
-            `.trim(),
+            content: `You are a function selector. You must ALWAYS respond with valid JSON only.
+RULES:
+- Respond with ONLY this exact JSON format: {"functionName":"chosen_name"}
+- Choose the best matching function from this list: ${functionNames.join(', ')}
+- If nothing matches, respond with: {"functionName":null}
+- NEVER write explanations, sentences, or any text outside the JSON
+- NEVER say "Unfortunately" or anything like that
+- If user ask about patient than use return  appointment function
+- Your entire response must be parseable by JSON.parse()`,
           },
-          { role: 'user', content: message },
+          {
+            role: 'user',
+            content: `Select the correct function for this message: "${message}"`,
+          },
         ],
       });
-
       const raw = completion.choices[0].message.content ?? '';
-      const parsed = this.parseJsonResponse<{ functionName: string }>(raw);
-      return parsed.functionName ?? null;
+      try {
+        const parsed = this.parseJsonResponse<{ functionName: string | null }>(raw);
+        return parsed.functionName ?? null;
+      } catch {
+        const match = raw.match(/\{[\s\S]*?\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]) as { functionName: string | null };
+          return parsed.functionName ?? null;
+        }
+        return null;
+      }
     } catch (error) {
       this.logger.error('Function finder failed', error);
       return null;

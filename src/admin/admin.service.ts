@@ -12,7 +12,7 @@ import type { AppointmentStatus } from '@prisma/client';
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   private generatePassword(): string {
     const chars =
