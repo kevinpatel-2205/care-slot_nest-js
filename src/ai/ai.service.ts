@@ -30,16 +30,12 @@ export class AiService {
   ): Promise<AiChatResponse> {
     switch (role) {
       case 'guest':
-        console.log('Handling chat for guest');
         return this.handleGuest(message);
       case 'PATIENT':
-        console.log('Handling chat for patient with userId:', userId);
         return this.handlePatient(message, userId!);
       case 'DOCTOR':
-        console.log('Handling chat for doctor with userId:', userId);
         return this.handleDoctor(message, userId!);
       case 'ADMIN':
-        console.log('Handling chat for admin');
         return this.handleAdmin(message);
       default:
         return { type: 'TEXT', message: 'Invalid user role.' };
