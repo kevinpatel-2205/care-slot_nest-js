@@ -9,10 +9,15 @@ import { CreateDoctorDto } from './dto/create-doctor.dto';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 import type { AppointmentStatus } from '@prisma/client';
+import { MailService } from '../common/mail/mail.service';
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private mailService: MailService,
+  ) { }
+
 
   private generatePassword(): string {
     const chars =
@@ -191,6 +196,12 @@ export class AdminService {
           });
         }
       }
+
+      await this.mailService.sendDoctorWelcomeEmail({
+        doctorName: name,
+        email,
+        password,
+      });
 
       return { user, doctor };
     });

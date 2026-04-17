@@ -11,6 +11,7 @@ import { HomeModule } from './home/home.module';
 import { AiModule } from './ai/ai.module';
 import { ReportModule } from './report/report.module';
 import envConfig from './config/env.config';
+import { MailModule } from './common/mail/mail.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import envConfig from './config/env.config';
     HomeModule,
     AiModule,
     ReportModule,
+    MailModule,
   ],
   controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }

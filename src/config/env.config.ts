@@ -17,4 +17,11 @@ export default () => ({
     model: process.env.GROQ_MODEL,
   },
   currency: process.env.CURRENCY ?? 'INR',
+  mail: {
+    host: process.env.BREVO_HOST ?? 'smtp-relay.brevo.com',
+    port: parseInt(process.env.BREVO_PORT ?? '2525'),
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_PASS,
+    from: process.env.MAIL_FROM,
+  },
 });

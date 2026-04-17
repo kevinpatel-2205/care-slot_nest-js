@@ -10,12 +10,14 @@ import { AppointmentStatus, Gender } from '@prisma/client';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AiReviewService } from '../ai/ai-review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
+import { MailService } from '../common/mail/mail.service';
 
 @Injectable()
 export class PatientService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiReviewService: AiReviewService,
+    private readonly mailService: MailService,
   ) { }
 
   private parseTimeSlot(timeSlot: string, baseDate: Date): Date {
@@ -396,6 +398,11 @@ export class PatientService {
       );
     }
 
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, email: true },
+    });
+
     const patient = await this.prisma.patient.findFirst({
       where: { userId, isDeleted: false },
     });
@@ -478,6 +485,26 @@ export class PatientService {
       });
 
       return appointment;
+    });
+
+    void this.mailService.sendAppointmentBookedEmailToDoctor({
+      doctorName: doctor.user!.name,
+      doctorEmail: doctor.user!.email,
+      patientName: currentUser?.name ?? '',
+      patientEmail: currentUser?.email ?? '',
+      patientAge: patient.dateOfBirth
+        ? Math.floor(
+          (Date.now() - new Date(patient.dateOfBirth).getTime()) /
+          (1000 * 60 * 60 * 24 * 365.25),
+        )
+        : undefined,
+      dateOfBirth: patient.dateOfBirth
+        ? new Date(patient.dateOfBirth).toLocaleDateString('en-IN')
+        : undefined,
+      medicalHistory: patient.medicalHistory ?? undefined,
+      appointmentDate,
+      timeSlot,
+      reason: notes ?? undefined,
     });
 
     return {
