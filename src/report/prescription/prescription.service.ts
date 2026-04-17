@@ -256,27 +256,7 @@ export class PrescriptionService {
       .text('www.careslot.com', 220, 735)
       .text('support@careslot.com', 400, 735);
 
-    console.log(`This is all detail in this pdf: ${JSON.stringify({
-      doctor: {
-        name: doctorUser?.name,
-        specialization: doctor?.specialization,
-        email: doctorUser?.email,
-        experience: doctor?.experience
-      },
-      patient: {
-        name: patientUser?.name,
-        email: patientUser?.email,
-        dateOfBirth: patient?.dateOfBirth
-      },
-      appointment: {
-        date: appointment.appointmentDate,
-        timeSlot: appointment.timeSlot
-      },
-      prescription: {
-        medicines: prescription.medicines,
-        additionalNotes: prescription.additionalNotes
-      }
-    })}`);
+
     doc.end();
   }
 }
