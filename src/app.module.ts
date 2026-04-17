@@ -9,6 +9,7 @@ import { PatientModule } from './patient/patient.module';
 import { PaymentModule } from './payment/payment.module';
 import { HomeModule } from './home/home.module';
 import { AiModule } from './ai/ai.module';
+import { ReportModule } from './report/report.module';
 import envConfig from './config/env.config';
 
 @Module({
@@ -22,6 +23,7 @@ import envConfig from './config/env.config';
     PaymentModule,
     HomeModule,
     AiModule,
+    ReportModule,
   ],
   controllers: [AppController],
 })

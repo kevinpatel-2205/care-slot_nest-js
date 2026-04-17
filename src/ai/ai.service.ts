@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AiGroqService, AiChatResponse } from './ai-groq.service';
 import { AiFunctionFinderService } from './ai-function-finder.service';
 import { GUEST_PROMPT } from './prompts/guest.prompt';
@@ -14,7 +14,6 @@ const FALLBACK: AiChatResponse = {
 
 @Injectable()
 export class AiService {
-  private readonly logger = new Logger(AiService.name);
 
   constructor(
     private readonly aiGroqService: AiGroqService,
