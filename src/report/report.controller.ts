@@ -14,6 +14,7 @@ import { ExcelService } from './excel.service';
 import { AppointmentStatus } from '@prisma/client';
 import { CurrentUser, JwtAuthGuard, Roles, RolesGuard } from '../common';
 import type { JwtPayload } from '../auth/strategy/jwt.strategy';
+import { ApiTags, ApiCookieAuth, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 // ── Column header constants ────────────────────────────────────────────────
 
@@ -89,6 +90,8 @@ const ADMIN_REVIEW_HEADERS = [
 
 // ── Controller ─────────────────────────────────────────────────────────────
 
+@ApiTags('Report')
+@ApiCookieAuth('token')
 @Controller('report')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ReportController {
@@ -103,6 +106,9 @@ export class ReportController {
 
 
   @Get('patient/appointments/pdf')
+  @ApiOperation({ summary: 'Download patient appointments as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
+  @ApiQuery({ name: 'status', required: false, enum: ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] })
   @Roles('PATIENT')
   async patientAppointmentsPdf(
     @CurrentUser() user: JwtPayload,
@@ -116,6 +122,8 @@ export class ReportController {
     this.pdfService.generate(res, 'My Appointments', PATIENT_APPOINTMENT_HEADERS, rows);
   }
   @Get('patient/appointments/excel')
+  @ApiOperation({ summary: 'Download patient appointments as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('PATIENT')
   async patientAppointmentsExcel(
     @CurrentUser() user: JwtPayload,
@@ -137,6 +145,8 @@ export class ReportController {
   // ── Doctor exports ───────────────────────────────────────────────────────
 
   @Get('doctor/dashboard/pdf')
+  @ApiOperation({ summary: 'Download full doctor dashboard report as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
   @Roles('DOCTOR')
   async doctorDashboardPdf(
     @CurrentUser() user: JwtPayload,
@@ -173,6 +183,8 @@ export class ReportController {
   }
 
   @Get('doctor/dashboard/excel')
+  @ApiOperation({ summary: 'Download full doctor dashboard report as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('DOCTOR')
   async doctorDashboardExcel(
     @CurrentUser() user: JwtPayload,
@@ -208,6 +220,8 @@ export class ReportController {
   }
 
   @Get('doctor/appointments/pdf')
+  @ApiOperation({ summary: 'Download doctor appointments as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
   @Roles('DOCTOR')
   async doctorAppointmentsPdf(
     @CurrentUser() user: JwtPayload,
@@ -222,6 +236,8 @@ export class ReportController {
   }
 
   @Get('doctor/appointments/excel')
+  @ApiOperation({ summary: 'Download doctor appointments as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('DOCTOR')
   async doctorAppointmentsExcel(
     @CurrentUser() user: JwtPayload,
@@ -241,6 +257,8 @@ export class ReportController {
   }
 
   @Get('doctor/patients/pdf')
+  @ApiOperation({ summary: 'Download doctor patients as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
   @Roles('DOCTOR')
   async doctorPatientsPdf(
     @CurrentUser() user: JwtPayload,
@@ -251,6 +269,8 @@ export class ReportController {
   }
 
   @Get('doctor/patients/excel')
+  @ApiOperation({ summary: 'Download doctor patients as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('DOCTOR')
   async doctorPatientsExcel(
     @CurrentUser() user: JwtPayload,
@@ -261,6 +281,8 @@ export class ReportController {
   }
 
   @Get('doctor/reviews/pdf')
+  @ApiOperation({ summary: 'Download doctor reviews as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
   @Roles('DOCTOR')
   async doctorReviewsPdf(
     @CurrentUser() user: JwtPayload,
@@ -271,6 +293,8 @@ export class ReportController {
   }
 
   @Get('doctor/reviews/excel')
+  @ApiOperation({ summary: 'Download doctor reviews as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('DOCTOR')
   async doctorReviewsExcel(
     @CurrentUser() user: JwtPayload,
@@ -284,6 +308,8 @@ export class ReportController {
 
 
   @Get('admin/dashboard/pdf')
+  @ApiOperation({ summary: 'Download full admin dashboard report as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
   @Roles('ADMIN')
   async adminDashboardPdf(@Res() res: Response): Promise<void> {
     const summary = await this.reportService.getAdminDashboardData();
@@ -322,6 +348,8 @@ export class ReportController {
   }
 
   @Get('admin/dashboard/excel')
+  @ApiOperation({ summary: 'Download full admin dashboard report as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('ADMIN')
   async adminDashboardExcel(@Res() res: Response): Promise<void> {
     const summary = await this.reportService.getAdminDashboardData();
@@ -361,6 +389,8 @@ export class ReportController {
 
 
   @Get('admin/doctors/pdf')
+  @ApiOperation({ summary: 'Download admin doctors list as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
   @Roles('ADMIN')
   async adminDoctorsPdf(@Res() res: Response): Promise<void> {
     const rows = await this.reportService.getAdminDoctorRows();
@@ -368,6 +398,8 @@ export class ReportController {
   }
 
   @Get('admin/doctors/excel')
+  @ApiOperation({ summary: 'Download admin doctors list as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('ADMIN')
   async adminDoctorsExcel(@Res() res: Response): Promise<void> {
     const rows = await this.reportService.getAdminDoctorRows();
@@ -380,6 +412,8 @@ export class ReportController {
   }
 
   @Get('admin/patients/pdf')
+  @ApiOperation({ summary: 'Download admin patients list as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
   @Roles('ADMIN')
   async adminPatientsPdf(@Res() res: Response): Promise<void> {
     const rows = await this.reportService.getAdminPatientRows();
@@ -387,6 +421,8 @@ export class ReportController {
   }
 
   @Get('admin/patients/excel')
+  @ApiOperation({ summary: 'Download admin patients list as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('ADMIN')
   async adminPatientsExcel(@Res() res: Response): Promise<void> {
     const rows = await this.reportService.getAdminPatientRows();
@@ -399,6 +435,8 @@ export class ReportController {
   }
 
   @Get('admin/appointments/pdf')
+  @ApiOperation({ summary: 'Download admin appointments as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
   @Roles('ADMIN')
   async adminAppointmentsPdf(
     @Query('status') status: AppointmentStatus,
@@ -414,6 +452,8 @@ export class ReportController {
   }
 
   @Get('admin/appointments/excel')
+  @ApiOperation({ summary: 'Download admin appointments as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('ADMIN')
   async adminAppointmentsExcel(
     @Query('status') status: AppointmentStatus,
@@ -429,6 +469,8 @@ export class ReportController {
   }
 
   @Get('admin/reviews/pdf')
+  @ApiOperation({ summary: 'Download admin reviews as PDF' })
+  @ApiResponse({ status: 200, description: 'PDF file downloaded' })
   @Roles('ADMIN')
   async adminReviewsPdf(@Res() res: Response): Promise<void> {
     const rows = await this.reportService.getAdminReviewRows();
@@ -436,6 +478,8 @@ export class ReportController {
   }
 
   @Get('admin/reviews/excel')
+  @ApiOperation({ summary: 'Download admin reviews as Excel' })
+  @ApiResponse({ status: 200, description: 'Excel file downloaded' })
   @Roles('ADMIN')
   async adminReviewsExcel(@Res() res: Response): Promise<void> {
     const rows = await this.reportService.getAdminReviewRows();
